@@ -7,9 +7,10 @@ from profiler import Profiler
 _DATA_PATH = 'data/'
 
 data_sets = [
-    'check_4_c', 'check_5_c', 'check_6_c',
+    'check_1_r', 'check_2_r', 'check_3_r',
+    # 'check_4_c', 'check_5_c', 'check_6_c',
     'check_7_c',
-    'check_8_c'
+    # 'check_8_c'
 ]
 
 
@@ -61,6 +62,7 @@ def main():
         train_err, test_err = run_train_test(data_path, metric, default_params, 1000)
 
         print(f'ds={data_path} train_err={train_err:.4f} test_err={test_err:.4f}')
+        print()
 
 
 if __name__ == '__main__':

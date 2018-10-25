@@ -78,8 +78,8 @@ def load_data(path, mode='train', sample=None):
     for col in cat_cols:
         df[col] = df[col].astype('category')
 
+    print('nulls=', df[cat_cols].isnull().sum())
     comparison = (df1_res[cat_cols] != df2_res[cat_cols]).sum()
-
     print('comparison=', comparison)
 
     # drop duplicate cols
