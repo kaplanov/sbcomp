@@ -42,31 +42,35 @@ def load_test_label(path):
 
 
 def load_data(path, mode='train', sample=None):
-    # read dataset
-    is_big = False
-    if mode == 'train':
-        df = pd.read_csv(path, low_memory=False)
-        shape_orig = df.shape
-        if sample is not None:
-            df = df.sample(n=sample)
-        df.set_index('line_id', inplace=True)
-        y = df.target
-        df = df.drop('target', axis=1)
-        if df.memory_usage().sum() > BIG_DATASET_SIZE:
-            is_big = True
-    else:
-        df = pd.read_csv(path, low_memory=False)
-        df.set_index('line_id', inplace=True)
-        y = None
+    with Profiler('read dataset'):
+        is_big = False
+        if mode == 'train':
+            df = pd.read_csv(path, low_memory=False)
+            shape_orig = df.shape
+            if sample is not None:
+                df = df.sample(n=sample)
+            df.set_index('line_id', inplace=True)
+            y = df.target
+            df = df.drop('target', axis=1)
+            if df.memory_usage().sum() > BIG_DATASET_SIZE:
+                is_big = True
+        else:
+            df = pd.read_csv(path, low_memory=False)
+            shape_orig = df.shape
+            df.set_index('line_id', inplace=True)
+            y = None
 
     print(f'Dataset read, orig: {shape_orig}, sampled: {df.shape}, memory: {get_mem(df)}, mode: {mode}')
 
-    # features from datetime
-    df, date_cols, orig_date_cols = transform_datetime_features(df)
+    with Profiler('features from datetime'):
+        df, date_cols, orig_date_cols = transform_datetime_features(df)
 
-    new_cat = cat_frequencies(df)
-    df, old_cat = old_transform_categorical_features(df, {})
-
+    df1 = df.copy(deep=True)
+    df2 = df.copy(deep=True)
+    with Profiler('new cat'):
+        df1_res, new_cat = cat_frequencies(df1)
+    with Profiler('old cat'):
+        df2_res, old_cat = old_transform_categorical_features(df2, {})
 
     # categorical encoding
     categorical_columns = transform_categorical_features(df)
@@ -74,8 +78,12 @@ def load_data(path, mode='train', sample=None):
     for col in cat_cols:
         df[col] = df[col].astype('category')
 
+    comparison = (df1_res[cat_cols] != df2_res[cat_cols]).sum()
+
+    print('comparison=', comparison)
+
     # drop duplicate cols
-    with Profiler('drop duplicate cols'):
+    with Profiler('drop constant cols'):
         if mode == 'train':
             constant_columns = [
                 col_name
@@ -114,10 +122,10 @@ def old_transform_categorical_features(df, categorical_values={}):
             if col_name.startswith('id') or col_name.startswith('string'):
                 categorical_values[col_name] = df[col_name].value_counts().to_dict()
 
-        # if col_name in categorical_values:
-        #     col_unique_values = df[col_name].unique()
-        #     for unique_value in col_unique_values:
-        #         df.loc[df[col_name] == unique_value, col_name] = categorical_values[col_name].get(unique_value, -1)
+        if col_name in categorical_values:
+            col_unique_values = df[col_name].unique()
+            for unique_value in col_unique_values:
+                df.loc[df[col_name] == unique_value, col_name] = categorical_values[col_name].get(unique_value, -1)
 
     return df, categorical_values
 
@@ -128,19 +136,9 @@ def cat_frequencies(df, freq=None):
 
     cat_cols = [col for col in df.columns.values if col.startswith('id') or col.startswith('string')]
 
-    upd_freq = {}
+    upd_freq = { col: df[col].value_counts().to_dict() for col in cat_cols}
+
     for col in cat_cols:
-        upd_freq[col] = df[col].groupby(df[col]).size()
+        df[col] = df[col].map(upd_freq[col])
 
-    # categorical encoding
-    # for col_name in list(df.columns):
-    #     if col_name not in categorical_values:
-    #         if col_name.startswith('id') or col_name.startswith('string'):
-    #             categorical_values[col_name] = df[col_name].value_counts().to_dict()
-    #
-    #     if col_name in categorical_values:
-    #         col_unique_values = df[col_name].unique()
-    #         for unique_value in col_unique_values:
-    #             df.loc[df[col_name] == unique_value, col_name] = categorical_values[col_name].get(unique_value, -1)
-
-    return upd_freq
+    return df, upd_freq

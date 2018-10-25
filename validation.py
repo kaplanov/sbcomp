@@ -7,8 +7,8 @@ from profiler import Profiler
 _DATA_PATH = 'data/'
 
 data_sets = [
-    # 'check_4_c', 'check_5_c', 'check_6_c',
-    # 'check_7_c',
+    'check_4_c', 'check_5_c', 'check_6_c',
+    'check_7_c',
     'check_8_c'
 ]
 
@@ -58,7 +58,7 @@ def main():
             'seed': 1
         }
         metric = roc_auc_score if mode == 'c' else mean_squared_error
-        train_err, test_err = run_train_test(data_path, metric, default_params, 10000)
+        train_err, test_err = run_train_test(data_path, metric, default_params, 1000)
 
         print(f'ds={data_path} train_err={train_err:.4f} test_err={test_err:.4f}')
 
