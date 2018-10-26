@@ -65,22 +65,22 @@ def load_data(path, mode='train', sample=None):
     with Profiler('features from datetime'):
         df, date_cols, orig_date_cols = transform_datetime_features(df)
 
-    df1 = df.copy(deep=True)
-    df2 = df.copy(deep=True)
+    # df1 = df.copy(deep=True)
+    # df2 = df.copy(deep=True)
     with Profiler('new cat'):
-        df1_res, new_cat = cat_frequencies(df1)
-    with Profiler('old cat'):
-        df2_res, old_cat = old_transform_categorical_features(df2, {})
+        df, cat_cols = cat_frequencies(df)
+    # with Profiler('old cat'):
+    #     df2_res, old_cat = old_transform_categorical_features(df2, {})
 
-    # categorical encoding
-    categorical_columns = transform_categorical_features(df)
-    cat_cols = list(categorical_columns.keys())
-    for col in cat_cols:
-        df[col] = df[col].astype('category')
-
-    print('nulls=', df[cat_cols].isnull().sum())
-    comparison = (df1_res[cat_cols] != df2_res[cat_cols]).sum()
-    print('comparison=', comparison)
+    # # categorical encoding
+    # categorical_columns = transform_categorical_features(df)
+    # cat_cols = list(categorical_columns.keys())
+    # for col in cat_cols:
+    #     df[col] = df[col].astype('category')
+    #
+    # print('nulls=', df[cat_cols].isnull().sum())
+    # comparison = (df1_res[cat_cols] != df2_res[cat_cols]).sum()
+    # print('comparison=', comparison)
 
     # drop duplicate cols
     with Profiler('drop constant cols'):
@@ -94,7 +94,7 @@ def load_data(path, mode='train', sample=None):
             df.drop(constant_columns, axis=1, inplace=True)
 
     # filter columns
-    used_columns = [c for c in df.columns if check_column_name(c) or c in categorical_columns or c in set(date_cols)]
+    used_columns = [c for c in df.columns if check_column_name(c) or c in cat_cols or c in set(date_cols)]
 
     line_id = pd.DataFrame(df.index)
     df = df[used_columns]
@@ -108,7 +108,7 @@ def load_data(path, mode='train', sample=None):
 
     model_config = dict(
         used_columns=used_columns,
-        categorical_values=categorical_columns,
+        cat_freqs=cat_cols,
         numeric_cols=numeric_cols,
         is_big=is_big
     )
@@ -136,9 +136,12 @@ def cat_frequencies(df, freq=None):
 
     cat_cols = [col for col in df.columns.values if col.startswith('id') or col.startswith('string')]
 
-    upd_freq = { col: df[col].value_counts().to_dict() for col in cat_cols}
+    new_freq = {col: df[col].value_counts().to_dict() for col in cat_cols}
+    upd_freq = {**new_freq, **freq}
 
     for col in cat_cols:
         df[col] = df[col].map(upd_freq[col])
+
+    df[cat_cols] = df[cat_cols].fillna(-1)
 
     return df, upd_freq

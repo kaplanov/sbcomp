@@ -1,6 +1,6 @@
 import time
 import lightgbm as lgb
-from sdsj_feat import load_data, load_test_label
+from sdsj_feat import load_data, load_test_label, cat_frequencies
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from profiler import Profiler
 
@@ -8,9 +8,9 @@ _DATA_PATH = 'data/'
 
 data_sets = [
     'check_1_r', 'check_2_r', 'check_3_r',
-    # 'check_4_c', 'check_5_c', 'check_6_c',
+    'check_4_c', 'check_5_c', 'check_6_c',
     'check_7_c',
-    # 'check_8_c'
+    'check_8_c'
 ]
 
 
@@ -19,6 +19,12 @@ def run_train_test(ds_name, metric, params, sample_train):
     x_train, y_train, train_params, _ = load_data(f'{path}/train.csv', mode='train')
     x_test, _, test_params, _ = load_data(f'{path}/test.csv', mode='test')
     y_test = load_test_label(f'{path}/test-target.csv')
+
+    x_test_tf = x_test.reindex(columns=train_params['used_columns'])
+    x_test_pr, _ = cat_frequencies(x_test_tf, train_params['cat_freqs'])
+
+    print('train_freqs=', train_params['cat_freqs'])
+    print('test_freqs=', test_params['cat_freqs'])
 
     with Profiler('run train'):
         model = lgb.train(
