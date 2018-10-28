@@ -53,14 +53,6 @@ def load_data(path, mode='train', sample=None):
 
     line_id = pd.DataFrame(df.index)
 
-    # cat_cols, df, numeric_cols, used_columns = initial_processing(df, mode)
-
-    # model_config = dict(
-    #     used_columns=used_columns,
-    #     cat_freqs=cat_cols,
-    #     numeric_cols=numeric_cols,
-    #     is_big=is_big
-    # )
     return df, y, line_id
 
 
@@ -73,9 +65,12 @@ def initial_processing(df, mode):
     with Profiler('features from datetime'):
         df, date_cols, orig_date_cols = transform_datetime_features(df)
     with Profiler('new cat'):
-        df, cat_freqs = cat_frequencies(df)
+        cat_cols = get_cat_freqs(df)
 
     numeric_cols = [c for c in df.columns if c.startswith('number')]
+
+    used_cols = date_cols + list(cat_cols) + numeric_cols
+    df = df.reindex(columns=used_cols)
 
     # drop duplicate cols
     with Profiler('drop constant cols'):
@@ -87,32 +82,40 @@ def initial_processing(df, mode):
             ]
             print(f' - dropping {len(constant_columns)} columns')
             df.drop(constant_columns, axis=1, inplace=True)
-    # filter columns
-    used_columns = [c for c in df.columns if check_column_name(c) or c in cat_freqs or c in set(date_cols)]
-    used_cols = date_cols + list(cat_freqs.keys()) + numeric_cols
-    print('cols diff=', set(used_columns) - set(used_cols))
-
-    df = df[used_columns]
 
     if is_big:
         df[numeric_cols] = df[numeric_cols].astype(np.float16)
-    print(f' - Cat: {len(cat_freqs)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
-    print(f' - Used: {len(used_columns)}, memory: {get_mem(df)}')
-    return df, cat_freqs, numeric_cols, date_cols, used_columns
+    print(f' - Cat: {len(cat_cols)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
+    print(f' - Used: {len(used_cols)}, memory: {get_mem(df)}')
+    params = dict(
+        cat_freqs=cat_cols,
+        numeric_cols=numeric_cols,
+        date_cols=date_cols,
+        used_cols=used_cols
+    )
+    return df, params
 
 
-def cat_frequencies(df, freq=None):
-    if freq is None:
-        freq = {}
-
+def get_cat_freqs(df):
     cat_cols = [col for col in df.columns.values if col.startswith('id') or col.startswith('string')]
+    # freqs = {col: df[col].value_counts().to_dict() for col in cat_cols}
 
-    new_freq = {col: df[col].value_counts().to_dict() for col in cat_cols}
-    upd_freq = {**new_freq, **freq}
+    return cat_cols
 
-    for col in cat_cols:
-        df[col] = df[col].map(upd_freq[col])
 
-    df[cat_cols] = df[cat_cols].fillna(-1)
-
-    return df, upd_freq
+# def cat_transform(df, freq, upd_freqs=False):
+#     if freq is None:
+#         freq = {}
+#
+#     cat_cols, new_freq = get_cat_freqs(df)
+#     if upd_freqs:
+#         upd_freq = {**new_freq, **freq}
+#     else:
+#         upd_freq = {**freq}
+#
+#     for col in cat_cols:
+#         df[col] = df[col].map(upd_freq[col])
+#
+#     df[cat_cols] = df[cat_cols].fillna(-1)
+#
+#     return df, upd_freq
