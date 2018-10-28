@@ -4,10 +4,9 @@ from sdsj_feat import initial_processing
 
 def test_cat_cols_frequency():
     df, params = initial_processing(train_data, mode='train')
-    cat_cols = params['cat_freqs']
+    cat_cols = params['cat_cols']
 
     assert set(cat_cols) == {'id_0', 'string_0', 'string_1'}
-
 
 
 def test_date_col_processing():

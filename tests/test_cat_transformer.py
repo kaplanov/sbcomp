@@ -5,7 +5,7 @@ from sdsj_feat import initial_processing
 
 def test_cat_fit_train():
     _, params = initial_processing(train_data, mode='train')
-    cat_cols = params['cat_freqs']
+    cat_cols = params['cat_cols']
 
     tf = CatTransformer(cat_cols)
     tf.fit(train_data[cat_cols])
@@ -25,7 +25,7 @@ def test_cat_fit_train():
 
 def test_cat_fit_test():
     _, params = initial_processing(train_data, mode='train')
-    cat_cols = params['cat_freqs']
+    cat_cols = params['cat_cols']
 
     tf = CatTransformer(cat_cols)
     tf.fit(train_data[cat_cols])

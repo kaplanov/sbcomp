@@ -24,7 +24,7 @@ def run_train_test(ds_name, metric, params, sample_train):
     x_test, _ = initial_processing(x_test_raw, mode='test')
 
     x_test_tf = x_test.reindex(columns=train_params['used_columns'])
-    x_test_pr, _ = cat_transform(x_test_tf, train_params['cat_freqs'])
+    x_test_pr, _ = cat_transform(x_test_tf, train_params['cat_cols'])
 
     print('train_freqs=', train_params['cat_freqs'])
     print('test_freqs=', test_params['cat_freqs'])

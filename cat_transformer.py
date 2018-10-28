@@ -14,8 +14,9 @@ class CatTransformer(TransformerMixin):
         encode categorical columns as frequencies
         """
         df = df_in.copy(deep=False)
+        df_to_transform = df.reindex(columns=self.columns)
         for col in self.columns:
-            df[col] = df[col].map(self.freqs[col])
+            df[col] = df_to_transform[col].map(self.freqs[col])
 
         df[self.columns] = df[self.columns].fillna(-1)
 

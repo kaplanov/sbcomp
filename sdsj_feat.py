@@ -88,7 +88,7 @@ def initial_processing(df, mode):
     print(f' - Cat: {len(cat_cols)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
     print(f' - Used: {len(used_cols)}, memory: {get_mem(df)}')
     params = dict(
-        cat_freqs=cat_cols,
+        cat_cols=cat_cols,
         numeric_cols=numeric_cols,
         date_cols=date_cols,
         used_cols=used_cols
