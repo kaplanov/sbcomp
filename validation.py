@@ -1,3 +1,4 @@
+import numpy as np
 import lightgbm as lgb
 from sdsj_feat import load_data, load_test_label, initial_processing
 from sklearn.metrics import mean_squared_error, roc_auc_score
@@ -9,8 +10,8 @@ _DATA_PATH = 'data/'
 data_sets = [
     'check_1_r', 'check_2_r', 'check_3_r',
     'check_4_c', 'check_5_c', 'check_6_c',
-    # 'check_7_c',
-    # 'check_8_c'
+    'check_7_c',
+    'check_8_c'
 ]
 
 
@@ -36,14 +37,18 @@ def run_train_test(ds_name, metric, params, sample_train):
             lgb.Dataset(x_train_tf, label=y_train),
             600)
 
-    y_train_out = model.predict(x_train_tf)
     with Profiler('predict'):
+        y_train_out = model.predict(x_train_tf)
         y_test_out = model.predict(x_test_tf)
 
     train_err = metric(y_train, y_train_out)
     test_err = metric(y_test, y_test_out)
 
     return train_err, test_err
+
+
+def rmse(y_true, y_pred):
+    return np.sqrt(mean_squared_error(y_true, y_pred))
 
 
 def main():
@@ -68,7 +73,7 @@ def main():
             'num_threads': 4,
             'seed': 1
         }
-        metric = roc_auc_score if mode == 'c' else mean_squared_error
+        metric = roc_auc_score if mode == 'c' else rmse
         mt_name = 'auc' if mode == 'c' else 'rmse'
         train_err, test_err = run_train_test(data_path, metric, default_params, 10000)
 

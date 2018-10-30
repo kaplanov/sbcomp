@@ -10,8 +10,6 @@ from cat_transformer import CatTransformer
 # use this to stop the algorithm before time limit exceeds
 TIME_LIMIT = int(os.environ.get('TIME_LIMIT', 5 * 60))
 
-ONEHOT_MAX_UNIQUE_VALUES = 20
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--train-csv', required=True)
@@ -61,11 +59,10 @@ if __name__ == '__main__':
             lgb.Dataset(x_train_tf, label=df_y),
             600)
 
-    # model = lgb.train(params, lgb.Dataset(df_X, label=df_y), 600)
-
     model_config['model'] = model
     model_config['cat_tf'] = tf
     model_config['params'] = params
+    model_config['train_params'] = train_params
 
     model_config_filename = os.path.join(args.model_dir, 'model_config.pkl')
     with open(model_config_filename, 'wb') as fout:

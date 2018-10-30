@@ -70,7 +70,6 @@ def initial_processing(df, mode):
     df = df.reindex(columns=used_cols)
 
     # drop duplicate cols
-
     if mode == 'train':
         with Profiler(' - drop constant cols'):
             constant_columns = [
