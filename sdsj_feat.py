@@ -61,15 +61,7 @@ def initial_processing(df, mode):
 
     with Profiler(' - features from datetime'):
         df, date_cols, orig_date_cols = transform_datetime_features(df)
-    with Profiler('new cat'):
-        cat_cols = get_cat_freqs(df)
 
-    numeric_cols = [c for c in df.columns if c.startswith('number')]
-
-    used_cols = date_cols + list(cat_cols) + numeric_cols
-    df = df.reindex(columns=used_cols)
-
-    # drop duplicate cols
     if mode == 'train':
         with Profiler(' - drop constant cols'):
             constant_columns = [
@@ -80,8 +72,17 @@ def initial_processing(df, mode):
             print(f' - dropping {len(constant_columns)} columns')
             df.drop(constant_columns, axis=1, inplace=True)
 
+    with Profiler('new cat'):
+        cat_cols = get_cat_freqs(df)
+
+    numeric_cols = [c for c in df.columns if c.startswith('number')]
+
+    used_cols = date_cols + list(cat_cols) + numeric_cols
+    df = df.reindex(columns=used_cols)
+
     if is_big:
         df[numeric_cols] = df[numeric_cols].astype(np.float16)
+
     print(f' - Cat: {len(cat_cols)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
     print(f' - Used: {len(used_cols)}, memory: {get_mem(df)}')
     params = dict(
