@@ -7,7 +7,8 @@ class CatTransformer(TransformerMixin):
         self.freqs = None
 
     def fit(self, X, y=None):
-        self.freqs = {col: X[col].value_counts().to_dict() for col in self.columns}
+        n_rows = X.shape[0]
+        self.freqs = {col: (X[col].value_counts() / n_rows).to_dict() for col in self.columns}
 
     def transform(self, df_in):
         """
@@ -17,7 +18,5 @@ class CatTransformer(TransformerMixin):
         df_to_transform = df.reindex(columns=self.columns)
         for col in self.columns:
             df[col] = df_to_transform[col].map(self.freqs[col])
-
-        df[self.columns] = df[self.columns].fillna(-1)
 
         return df

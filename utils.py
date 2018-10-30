@@ -30,12 +30,12 @@ def transform_datetime_features(df):
 
         res_date_cols += [year, month, weekday, day, hour]
 
-    df[res_date_cols] = df[res_date_cols].fillna(-1)
-
-    for col in res_date_cols:
-        if 'year' in col:
-            df[col] = df[col].astype(np.int16)
-        else:
-            df[col] = df[col].astype(np.int8)
+    # df[res_date_cols] = df[res_date_cols].fillna(-1)
+    #
+    # for col in res_date_cols:
+    #     if 'year' in col:
+    #         df[col] = df[col].astype(np.int16)
+    #     else:
+    #         df[col] = df[col].astype(np.int8)
     return df, res_date_cols, datetime_columns
 
