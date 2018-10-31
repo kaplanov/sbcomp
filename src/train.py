@@ -3,9 +3,9 @@ import os
 import pickle
 import time
 import lightgbm as lgb
-from profiler import Profiler
-from sdsj_feat import load_data, initial_processing
-from cat_transformer import CatTransformer
+from src.profiler import Profiler
+from src.processing import load_data, initial_processing
+from src.cat_transformer import CatTransformer
 
 # use this to stop the algorithm before time limit exceeds
 TIME_LIMIT = int(os.environ.get('TIME_LIMIT', 5 * 60))

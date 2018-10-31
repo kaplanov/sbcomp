@@ -1,17 +1,17 @@
 import numpy as np
 import lightgbm as lgb
-from sdsj_feat import load_data, load_test_label, initial_processing
+from src.processing import load_data, load_test_label, initial_processing
 from sklearn.metrics import mean_squared_error, roc_auc_score
-from cat_transformer import CatTransformer
-from profiler import Profiler
+from src.cat_transformer import CatTransformer
+from src.profiler import Profiler
 
 _DATA_PATH = 'data/'
 
 data_sets = [
     'check_1_r', 'check_2_r', 'check_3_r',
     'check_4_c', 'check_5_c', 'check_6_c',
-    'check_7_c',
-    'check_8_c'
+    # 'check_7_c',
+    # 'check_8_c'
 ]
 
 

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from utils import transform_datetime_features
-from profiler import Profiler
+from src.utils import transform_datetime_features
+from src.profiler import Profiler
 
 ONEHOT_MAX_UNIQUE_VALUES = 20
 BIG_DATASET_SIZE = 500 * 1024 * 1024

@@ -1,6 +1,6 @@
 from tests.data import train_data, test_data
-from sdsj_feat import initial_processing
-from cat_transformer import CatTransformer
+from src.processing import initial_processing
+from src.cat_transformer import CatTransformer
 
 
 def test_run_train_test():
