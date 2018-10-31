@@ -30,10 +30,11 @@ def load_test_label(path):
     return y
 
 
-def load_data(path, mode='train', sample=None):
+def load_data(path, mode='train', sample=None, used_cols=None):
     with Profiler('read dataset'):
         if mode == 'train':
-            df = pd.read_csv(path, low_memory=False)
+            cols = ['line_id', 'target'] + used_cols if used_cols is not None else used_cols
+            df = pd.read_csv(path, low_memory=False, usecols=cols)
             shape_orig = df.shape
             if sample is not None and sample < df.shape[0]:
                 df = df.sample(n=sample)
@@ -41,6 +42,7 @@ def load_data(path, mode='train', sample=None):
             y = df.target
             df = df.drop('target', axis=1)
         else:
+            cols = ['line_id'] + used_cols if used_cols is not None else used_cols
             df = pd.read_csv(path, low_memory=False)
             shape_orig = df.shape
             df.set_index('line_id', inplace=True)

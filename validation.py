@@ -3,21 +3,28 @@ import lightgbm as lgb
 from src.processing import load_data, load_test_label, initial_processing
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from src.cat_transformer import CatTransformer
+from src.feature_selection import ols_selection
 from src.profiler import Profiler
 
 _DATA_PATH = 'data/'
+_SAMPLE = 10000
 
 data_sets = [
-    'check_1_r', 'check_2_r', 'check_3_r',
-    'check_4_c', 'check_5_c', 'check_6_c',
+    # 'check_1_r', 'check_2_r', 'check_3_r',
+    # 'check_4_c', 'check_5_c', 'check_6_c',
     # 'check_7_c',
-    # 'check_8_c'
+    'check_8_c'
 ]
 
 
-def run_train_test(ds_name, metric, params, sample_train):
+def run_train_test(ds_name, metric, params):
     path = _DATA_PATH + ds_name
-    x_train_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=sample_train)
+    x_initial_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
+    x_initial, ini_params = initial_processing(x_initial_raw, mode='train')
+    features = ols_selection(x_initial)
+
+    x_train_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE, used_cols=features)
+
     x_test_raw, _, _ = load_data(f'{path}/test.csv', mode='test')
     y_test = load_test_label(f'{path}/test-target.csv')
 
@@ -75,7 +82,7 @@ def main():
         }
         metric = roc_auc_score if mode == 'c' else rmse
         mt_name = 'auc' if mode == 'c' else 'rmse'
-        train_err, test_err = run_train_test(data_path, metric, default_params, 10000)
+        train_err, test_err = run_train_test(data_path, metric, default_params)
 
         print(f'ds={data_path} train_{mt_name}={train_err:.4f} test_{mt_name}={test_err:.4f}')
         print()
