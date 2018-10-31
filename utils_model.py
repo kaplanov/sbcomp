@@ -145,10 +145,12 @@ def xgb_train_wrapper(x, y, metric, sample_size=None):
         'min_child_weight': [1, 2, 4, 6],
     }
     params_out = xgb_gs(init_params, params_search, dsample)
+
     params_search = {
         'lambda': [0, 1, 3],
         'alpha': [0, .1, .3]}
     params_out = xgb_gs(params_out, params_search, dsample)
+
     print(params_out)
 
     model = xgb.train(params_out, dtrain, params_out['num_rounds'])

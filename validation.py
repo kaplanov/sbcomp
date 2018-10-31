@@ -10,20 +10,29 @@ _DATA_PATH = 'data/'
 _SAMPLE = 10000
 
 data_sets = [
-    # 'check_1_r', 'check_2_r', 'check_3_r',
-    # 'check_4_c', 'check_5_c', 'check_6_c',
+    'check_1_r',
+    'check_2_r',
+    'check_3_r',
+    'check_4_c', 'check_5_c', 'check_6_c',
     # 'check_7_c',
-    'check_8_c'
+    # 'check_8_c'
 ]
 
 
 def run_train_test(ds_name, metric, params):
     path = _DATA_PATH + ds_name
-    x_initial_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
-    x_initial, ini_params = initial_processing(x_initial_raw, mode='train')
-    features = ols_selection(x_initial)
+    with Profiler('initial feature selection'):
+        x_initial_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
+        x_initial, ini_params = initial_processing(x_initial_raw, mode='train')
 
-    x_train_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE, used_cols=features)
+        tf = CatTransformer(ini_params['cat_cols'])
+        # tf.fit(x_initial)
+        x_initial_tf = tf.fit_transform(x_initial)
+        selected_features = ols_selection(x_initial_tf, y_train)
+
+    print('selected features=', len(selected_features))
+
+    x_train_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE, used_cols=selected_features)
 
     x_test_raw, _, _ = load_data(f'{path}/test.csv', mode='test')
     y_test = load_test_label(f'{path}/test-target.csv')

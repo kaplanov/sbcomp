@@ -9,6 +9,7 @@ class CatTransformer(TransformerMixin):
     def fit(self, X, y=None):
         n_rows = X.shape[0]
         self.freqs = {col: (X[col].value_counts() / n_rows).to_dict() for col in self.columns}
+        return self
 
     def transform(self, df_in):
         """
