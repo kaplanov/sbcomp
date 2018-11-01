@@ -1,7 +1,7 @@
 import pandas as pd
 from scipy.stats import linregress
 
-_r2_thresh = 0.01
+_r2_thresh = 0.005
 
 
 def _extract_orig_col(col):

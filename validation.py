@@ -14,8 +14,8 @@ data_sets = [
     'check_2_r',
     'check_3_r',
     'check_4_c', 'check_5_c', 'check_6_c',
-    # 'check_7_c',
-    # 'check_8_c'
+    'check_7_c',
+    'check_8_c'
 ]
 
 

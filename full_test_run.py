@@ -6,8 +6,8 @@ import pandas as pd
 from sklearn.metrics import mean_squared_error, roc_auc_score
 
 datasets = [
-    # 'check_1_r', 'check_2_r',
-    # 'check_3_r', 'check_4_c', 'check_5_c', 'check_6_c',
+    'check_1_r', 'check_2_r',
+    'check_3_r', 'check_4_c', 'check_5_c', 'check_6_c',
     'check_7_c', 'check_8_c'
 ]
 result_dir = 'res'
@@ -24,13 +24,13 @@ for data_set_path in datasets:
 
     print('### Check dataset', data_set_path)
 
-    os.system('python train.py --mode {} --train-csv {} --model-dir {}'.format(
+    os.system('python src/train.py --mode {} --train-csv {} --model-dir {}'.format(
         'regression' if data_set_path[-1] == 'r' else 'classification',
         '{}/{}/train.csv'.format(data_dir, data_set_path),
         '{}/{}/'.format(result_dir, data_set_path)
     ))
 
-    os.system('python predict.py --prediction-csv {} --test-csv {} --model-dir {}'.format(
+    os.system('python src/predict.py --prediction-csv {} --test-csv {} --model-dir {}'.format(
         '{}/{}/pred.csv'.format(result_dir, data_set_path),
         '{}/{}/test.csv'.format(data_dir, data_set_path),
         '{}/{}/'.format(result_dir, data_set_path)
