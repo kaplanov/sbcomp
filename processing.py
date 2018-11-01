@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from src.utils import transform_datetime_features
-from src.profiler import Profiler
+from utils import transform_datetime_features
+from profiler import Profiler
 
 ONEHOT_MAX_UNIQUE_VALUES = 20
 BIG_DATASET_SIZE = 500 * 1024 * 1024
@@ -43,7 +43,7 @@ def load_data(path, mode='train', sample=None, used_cols=None):
             df = df.drop('target', axis=1)
         else:
             cols = ['line_id'] + used_cols if used_cols is not None else used_cols
-            df = pd.read_csv(path, low_memory=False)
+            df = pd.read_csv(path, low_memory=False, usecols=cols)
             shape_orig = df.shape
             df.set_index('line_id', inplace=True)
             y = None
@@ -64,18 +64,17 @@ def initial_processing(df, mode):
     with Profiler(' - features from datetime'):
         df, date_cols, orig_date_cols = transform_datetime_features(df)
 
-    if mode == 'train':
-        with Profiler(' - drop constant cols'):
-            constant_columns = [
-                col_name
-                for col_name in df.columns
-                if df[col_name].nunique() == 1
-            ]
-            print(f' - dropping {len(constant_columns)} columns')
-            df.drop(constant_columns, axis=1, inplace=True)
+    # if mode == 'train':
+    #     with Profiler(' - drop constant cols'):
+    #         constant_columns = [
+    #             col_name
+    #             for col_name in df.columns
+    #             if df[col_name].nunique() == 1
+    #         ]
+    #         print(f' - dropping {len(constant_columns)} columns')
+    #         df.drop(constant_columns, axis=1, inplace=True)
 
-    with Profiler('new cat'):
-        cat_cols = get_cat_freqs(df)
+    cat_cols = get_cat_freqs(df)
 
     numeric_cols = [c for c in df.columns if c.startswith('number')]
 

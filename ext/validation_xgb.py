@@ -1,7 +1,7 @@
 import time
 import numpy as np
-from utils_mk2 import load_data, load_test_label, preprocessing
-from utils_model import xgb_train_wrapper, xgb_predict_wrapper
+from ext.utils_mk2 import load_data, load_test_label, preprocessing
+from ext.utils_model import xgb_train_wrapper, xgb_predict_wrapper
 from sklearn.metrics import mean_squared_error, roc_auc_score
 
 _DATA_PATH = 'data/'

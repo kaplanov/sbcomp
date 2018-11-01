@@ -1,7 +1,7 @@
 import numpy as np
 from tests.data import train_data, test_data
-from src.cat_transformer import CatTransformer
-from src.processing import initial_processing
+from cat_transformer import CatTransformer
+from processing import initial_processing
 
 
 def test_cat_fit_train():

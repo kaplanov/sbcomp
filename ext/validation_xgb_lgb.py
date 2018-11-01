@@ -1,7 +1,7 @@
 import time
 import xgboost as xgb
 import lightgbm as lgb
-from utils_mk2 import load_data, load_test_label, preprocessing
+from ext.utils_mk2 import load_data, load_test_label, preprocessing
 from sklearn.metrics import mean_squared_error, roc_auc_score
 
 _DATA_PATH = 'data/'
