@@ -10,7 +10,7 @@ from feature_selection import ols_selection
 
 # use this to stop the algorithm before time limit exceeds
 TIME_LIMIT = int(os.environ.get('TIME_LIMIT', 5 * 60))
-_SAMPLE = 10000
+_SAMPLE = 100000
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -24,10 +24,11 @@ if __name__ == '__main__':
     model_config = dict()
     model_config['mode'] = args.mode
 
+    obj = 'regression' if args.mode == 'regression' else 'binary'
     params = {
         'task': 'train',
         'boosting_type': 'gbdt',
-        'objective': 'regression' if args.mode == 'regression' else 'binary',
+        'objective': obj,
         'metric': 'rmse',
         "learning_rate": 0.01,
         "num_leaves": 200,
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         x_initial, ini_params = initial_processing(x_ini_raw, mode='train')
         tf = CatTransformer(ini_params['cat_cols'])
         x_initial_tf = tf.fit_transform(x_initial)
-        selected_features = ols_selection(x_initial_tf, y_ini)
+        selected_features = ols_selection(x_initial_tf, y_ini, obj)
     print(f'{ len(selected_features)} features selected')
 
     df_X_raw, df_y, _ = load_data(args.train_csv, used_cols=selected_features)

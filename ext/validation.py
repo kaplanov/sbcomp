@@ -7,19 +7,20 @@ from feature_selection import ols_selection
 from profiler import Profiler
 
 _DATA_PATH = '../data/'
-_SAMPLE = 10000
+_SAMPLE = 100000
 
 data_sets = [
     'check_1_r',
     'check_2_r',
     'check_3_r',
-    'check_4_c', 'check_5_c', 'check_6_c',
+    'check_4_c',
+    'check_5_c', 'check_6_c',
     'check_7_c',
     'check_8_c'
 ]
 
 
-def run_train_test(ds_name, metric, params):
+def run_train_test(ds_name, metric, params, obj):
     path = _DATA_PATH + ds_name
     with Profiler('initial feature selection'):
         x_initial_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
@@ -28,7 +29,7 @@ def run_train_test(ds_name, metric, params):
         tf = CatTransformer(ini_params['cat_cols'])
         # tf.fit(x_initial)
         x_initial_tf = tf.fit_transform(x_initial)
-        selected_features = ols_selection(x_initial_tf, y_train)
+        selected_features = ols_selection(x_initial_tf, y_train, obj)
 
     print('selected features=', len(selected_features))
 
@@ -70,10 +71,11 @@ def rmse(y_true, y_pred):
 def main():
     for data_path in data_sets:
         mode = data_path[-1]
+        obj = 'regression' if mode == 'r' else 'binary',
         default_params = {
             'task': 'train',
             'boosting_type': 'gbdt',
-            'objective': 'regression' if mode == 'r' else 'binary',
+            'objective': obj,
             'metric': 'rmse',
             "learning_rate": 0.01,
             "num_leaves": 200,
@@ -91,7 +93,7 @@ def main():
         }
         metric = roc_auc_score if mode == 'c' else rmse
         mt_name = 'auc' if mode == 'c' else 'rmse'
-        train_err, test_err = run_train_test(data_path, metric, default_params)
+        train_err, test_err = run_train_test(data_path, metric, default_params, obj)
 
         print(f'ds={data_path} train_{mt_name}={train_err:.4f} test_{mt_name}={test_err:.4f}')
         print()
