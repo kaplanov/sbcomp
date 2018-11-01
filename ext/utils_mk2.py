@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from utils_model import calc_xgb, calc_ols
+from ext.utils_model import calc_xgb, calc_ols
 
 ONEHOT_MAX_UNIQUE_VALUES = 20
 BIG_DATASET_SIZE = 500 * 1024 * 1024

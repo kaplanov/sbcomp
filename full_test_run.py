@@ -24,13 +24,13 @@ for data_set_path in datasets:
 
     print('### Check dataset', data_set_path)
 
-    os.system('python src/train.py --mode {} --train-csv {} --model-dir {}'.format(
+    os.system('python train.py --mode {} --train-csv {} --model-dir {}'.format(
         'regression' if data_set_path[-1] == 'r' else 'classification',
         '{}/{}/train.csv'.format(data_dir, data_set_path),
         '{}/{}/'.format(result_dir, data_set_path)
     ))
 
-    os.system('python src/predict.py --prediction-csv {} --test-csv {} --model-dir {}'.format(
+    os.system('python predict.py --prediction-csv {} --test-csv {} --model-dir {}'.format(
         '{}/{}/pred.csv'.format(result_dir, data_set_path),
         '{}/{}/test.csv'.format(data_dir, data_set_path),
         '{}/{}/'.format(result_dir, data_set_path)

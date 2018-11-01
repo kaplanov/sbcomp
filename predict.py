@@ -2,8 +2,8 @@ import argparse
 import os
 import pickle
 import time
-from src.profiler import Profiler
-from src.processing import load_data, initial_processing
+from profiler import Profiler
+from processing import load_data, initial_processing
 # from cat_transformer import CatTransformer
 
 # use this to stop the algorithm before time limit exceeds

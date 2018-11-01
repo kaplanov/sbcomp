@@ -1,5 +1,5 @@
 from tests.data import train_data
-from src.processing import initial_processing
+from processing import initial_processing
 
 
 def test_cat_cols_frequency():

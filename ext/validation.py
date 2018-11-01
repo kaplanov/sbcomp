@@ -1,12 +1,12 @@
 import numpy as np
 import lightgbm as lgb
-from src.processing import load_data, load_test_label, initial_processing
+from processing import load_data, load_test_label, initial_processing
 from sklearn.metrics import mean_squared_error, roc_auc_score
-from src.cat_transformer import CatTransformer
-from src.feature_selection import ols_selection
-from src.profiler import Profiler
+from cat_transformer import CatTransformer
+from feature_selection import ols_selection
+from profiler import Profiler
 
-_DATA_PATH = 'data/'
+_DATA_PATH = '../data/'
 _SAMPLE = 10000
 
 data_sets = [
