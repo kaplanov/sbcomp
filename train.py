@@ -7,6 +7,7 @@ from profiler import Profiler
 from processing import load_data, initial_processing
 from cat_transformer import CatTransformer
 from feature_selection import ols_selection
+from model_selection import hyperopt_lgb
 
 # use this to stop the algorithm before time limit exceeds
 TIME_LIMIT = int(os.environ.get('TIME_LIMIT', 5 * 60))
@@ -49,7 +50,8 @@ if __name__ == '__main__':
         x_initial, ini_params = initial_processing(x_ini_raw, mode='train')
         tf = CatTransformer(ini_params['cat_cols'])
         x_initial_tf = tf.fit_transform(x_initial)
-        selected_features = ols_selection(x_initial_tf, y_ini, obj)
+        selected_features, feat_list = ols_selection(x_initial_tf, y_ini, obj)
+        hp_params = hyperopt_lgb(x_initial_tf[feat_list], y_ini, params, obj)
     print(f'{ len(selected_features)} features selected')
 
     df_X_raw, df_y, _ = load_data(args.train_csv, used_cols=selected_features)
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
     with Profiler('run train'):
         model = lgb.train(
-            params,
+            hp_params,
             lgb.Dataset(x_train_tf, label=df_y),
             600)
 

@@ -1,28 +1,30 @@
 import numpy as np
 import lightgbm as lgb
-import hyperopt
+from hyperopt import hp, tpe, STATUS_OK, space_eval, Trials, fmin
+from sklearn.model_selection import train_test_split
 
 
-def train_lightgbm(x, y, config: Config):
-    params = {
-        "objective": "regression" if config["mode"] == "regression" else "binary",
-        "metric": "rmse" if config["mode"] == "regression" else "auc",
-        "verbosity": -1,
-        "seed": 1,
-    }
+# def train_lightgbm(x, y, config: Config):
+#     params = {
+#         "objective": "regression" if config["mode"] == "regression" else "binary",
+#         "metric": "rmse" if config["mode"] == "regression" else "auc",
+#         "verbosity": -1,
+#         "seed": 1,
+#     }
+#
+#     X_sample, y_sample = data_sample(X, y)
+#     hyperparams = hyperopt_lgb(X_sample, y_sample, params, config)
+#
+#     X_train, X_val, y_train, y_val = data_split(X, y)
+#     train_data = lgb.Dataset(X_train, label=y_train)
+#     valid_data = lgb.Dataset(X_val, label=y_val)
+#
+#     config["model"] = lgb.train({**params, **hyperparams}, train_data, 3000, valid_data, early_stopping_rounds=50,
+#                                 verbose_eval=100)
 
-    X_sample, y_sample = data_sample(X, y)
-    hyperparams = hyperopt_lightgbm(X_sample, y_sample, params, config)
 
-    X_train, X_val, y_train, y_val = data_split(X, y)
-    train_data = lgb.Dataset(X_train, label=y_train)
-    valid_data = lgb.Dataset(X_val, label=y_val)
-
-    config["model"] = lgb.train({**params, **hyperparams}, train_data, 3000, valid_data, early_stopping_rounds=50, verbose_eval=100)
-
-
-def hyperopt_lightgbm(x, y, params, config):
-    X_train, X_val, y_train, y_val = data_split(X, y, test_size=0.5)
+def hyperopt_lgb(x, y, params, obj):
+    X_train, X_val, y_train, y_val = train_test_split(x, y, test_size=0.2)
     train_data = lgb.Dataset(X_train, label=y_train)
     valid_data = lgb.Dataset(X_val, label=y_val)
 
@@ -40,18 +42,18 @@ def hyperopt_lightgbm(x, y, params, config):
 
     def objective(hyperparams):
         model = lgb.train({**params, **hyperparams}, train_data, 300, valid_data,
-                          early_stopping_rounds=100, verbose_eval=100)
+                          early_stopping_rounds=30, verbose_eval=100)
 
         score = model.best_score["valid_0"][params["metric"]]
-        if config.is_classification():
+        if obj == 'binary':
             score = -score
 
         return {'loss': score, 'status': STATUS_OK}
 
     trials = Trials()
-    best = hyperopt.fmin(fn=objective, space=space, trials=trials, algo=tpe.suggest, max_evals=50, verbose=1,
-                         rstate=np.random.RandomState(1))
+    best = fmin(fn=objective, space=space, trials=trials, algo=tpe.suggest, max_evals=50, verbose=1,
+                rstate=np.random.RandomState(1))
 
-    hyperparams = space_eval(space, best)
-    log("{:0.4f} {}".format(trials.best_trial['result']['loss'], hyperparams))
-    return hyperparams
+    hyper_params = space_eval(space, best)
+    print("{:0.4f} {}".format(trials.best_trial['result']['loss'], hyper_params))
+    return hyper_params

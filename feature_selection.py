@@ -26,11 +26,12 @@ def ols_selection(df, y, objective):
         r2_dict = features.T['r_squared'].to_dict()
         var_dict = features.T['var'].to_dict()
 
-    feat_list = [_extract_orig_col(col) for col, r2 in r2_dict.items() if r2 > _r2_thresh and var_dict[col] != 0]
+    tf_features = [col for col, r2 in r2_dict.items() if r2 > _r2_thresh and var_dict[col] != 0]
+    feat_list = [_extract_orig_col(col) for col in tf_features]
     unique_features = set(feat_list)
 
     res = list(unique_features)
-    return res
+    return res, tf_features
 
 
 def calc_ols(df, y):

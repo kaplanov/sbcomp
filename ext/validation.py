@@ -5,31 +5,34 @@ from sklearn.metrics import mean_squared_error, roc_auc_score
 from cat_transformer import CatTransformer
 from feature_selection import ols_selection
 from profiler import Profiler
+from model_selection import hyperopt_lgb
 
 _DATA_PATH = '../data/'
 _SAMPLE = 100000
 
 data_sets = [
-    # 'check_1_r',
-    # 'check_2_r',
-    # 'check_3_r',
-    # 'check_4_c',
-    # 'check_5_c', 'check_6_c',
+    'check_1_r',
+    'check_2_r',
+    'check_3_r',
+    'check_4_c',
+    'check_5_c',
+    'check_6_c',
     # 'check_7_c',
-    'check_8_c'
+    # 'check_8_c'
 ]
 
 
 def run_train_test(ds_name, metric, params, obj):
     path = _DATA_PATH + ds_name
     with Profiler('initial feature selection'):
-        x_initial_raw, y_train, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
+        x_initial_raw, y_initial, _ = load_data(f'{path}/train.csv', mode='train', sample=_SAMPLE)
         x_initial, ini_params = initial_processing(x_initial_raw, mode='train')
 
         tf = CatTransformer(ini_params['cat_cols'])
         # tf.fit(x_initial)
         x_initial_tf = tf.fit_transform(x_initial)
-        selected_features = ols_selection(x_initial_tf, y_train, obj)
+        selected_features, feat_list = ols_selection(x_initial_tf, y_initial, obj)
+        hp_params = hyperopt_lgb(x_initial_tf[feat_list], y_initial, params, obj)
 
     print('selected features=', len(selected_features))
 
@@ -50,7 +53,7 @@ def run_train_test(ds_name, metric, params, obj):
 
     with Profiler('run train'):
         model = lgb.train(
-            params,
+            hp_params,
             lgb.Dataset(x_train_tf, label=y_train),
             600)
 

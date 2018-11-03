@@ -72,9 +72,9 @@ def initial_processing(df, mode):
         used_cols = date_cols + list(cat_cols) + numeric_cols
         df = df.reindex(columns=used_cols)
 
-    if is_big:
-        with Profiler(' - convert to float32'):
-            df[numeric_cols] = df[numeric_cols].astype(np.float32)
+    # if is_big:
+    #     with Profiler(' - convert to float32'):
+    #         df[numeric_cols] = df[numeric_cols].astype(np.float32)
 
     print(f' - Cat: {len(cat_cols)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
     print(f' - Used: {len(used_cols)}, memory: {get_mem(df)}')
