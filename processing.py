@@ -30,11 +30,11 @@ def load_test_label(path):
     return y
 
 
-def load_data(path, mode='train', sample=None, used_cols=None):
+def load_data(path, mode='train', sample=None, used_cols=None, dtypes=None):
     with Profiler('read dataset'):
         if mode == 'train':
             cols = ['line_id', 'target'] + used_cols if used_cols is not None else used_cols
-            df = pd.read_csv(path, low_memory=False, usecols=cols)
+            df = pd.read_csv(path, low_memory=False, usecols=cols, dtype=dtypes, engine='c')
             shape_orig = df.shape
             if sample is not None and sample < df.shape[0]:
                 df = df.sample(n=sample)
@@ -43,7 +43,7 @@ def load_data(path, mode='train', sample=None, used_cols=None):
             df = df.drop('target', axis=1)
         else:
             cols = ['line_id'] + used_cols if used_cols is not None else used_cols
-            df = pd.read_csv(path, low_memory=False, usecols=cols)
+            df = pd.read_csv(path, low_memory=False, usecols=cols, dtype=dtypes, engine='c')
             shape_orig = df.shape
             df.set_index('line_id', inplace=True)
             y = None
@@ -64,25 +64,17 @@ def initial_processing(df, mode):
     with Profiler(' - features from datetime'):
         df, date_cols, orig_date_cols = transform_datetime_features(df)
 
-    # if mode == 'train':
-    #     with Profiler(' - drop constant cols'):
-    #         constant_columns = [
-    #             col_name
-    #             for col_name in df.columns
-    #             if df[col_name].nunique() == 1
-    #         ]
-    #         print(f' - dropping {len(constant_columns)} columns')
-    #         df.drop(constant_columns, axis=1, inplace=True)
-
     cat_cols = get_cat_freqs(df)
 
     numeric_cols = [c for c in df.columns if c.startswith('number')]
 
-    used_cols = date_cols + list(cat_cols) + numeric_cols
-    df = df.reindex(columns=used_cols)
+    with Profiler(' - reindex new cols'):
+        used_cols = date_cols + list(cat_cols) + numeric_cols
+        df = df.reindex(columns=used_cols)
 
     if is_big:
-        df[numeric_cols] = df[numeric_cols].astype(np.float16)
+        with Profiler(' - convert to float32'):
+            df[numeric_cols] = df[numeric_cols].astype(np.float32)
 
     print(f' - Cat: {len(cat_cols)}, num: {len(numeric_cols)}, date: {len(date_cols)}, orig_dt: {len(orig_date_cols)}')
     print(f' - Used: {len(used_cols)}, memory: {get_mem(df)}')

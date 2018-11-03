@@ -10,12 +10,12 @@ _DATA_PATH = '../data/'
 _SAMPLE = 100000
 
 data_sets = [
-    'check_1_r',
-    'check_2_r',
-    'check_3_r',
-    'check_4_c',
-    'check_5_c', 'check_6_c',
-    'check_7_c',
+    # 'check_1_r',
+    # 'check_2_r',
+    # 'check_3_r',
+    # 'check_4_c',
+    # 'check_5_c', 'check_6_c',
+    # 'check_7_c',
     'check_8_c'
 ]
 
